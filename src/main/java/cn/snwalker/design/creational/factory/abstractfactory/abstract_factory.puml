@@ -1,0 +1,103 @@
+@startuml
+set separator none
+title Abstract Factory Pattern
+
+package "cn.snwalker.design.creational.factory.abstractfactory" {
+
+  ' --- Interfaces ---
+  interface Shape {
+    + draw()
+  }
+
+  interface Color {
+    + fill()
+  }
+
+  ' --- Concrete Products ---
+  class Circle {
+    + draw()
+  }
+  class Square {
+    + draw()
+  }
+  class Rectangle {
+    + draw()
+  }
+
+  class Red {
+    + fill()
+  }
+  class Green {
+    + fill()
+  }
+  class Blue {
+    + fill()
+  }
+
+  ' --- Abstract Factory ---
+  abstract class AbstractFactory {
+    + {abstract} getShape(type : String) : Shape
+    + {abstract} getColor(type : String) : Color
+  }
+
+  ' --- Concrete Factories ---
+  class ShapeFactory {
+    + getShape(type : String) : Shape
+    + getColor(type : String) : Color
+  }
+
+  class ColorFactory {
+    + getShape(type : String) : Shape
+    + getColor(type : String) : Color
+  }
+
+  ' --- Producer & Client ---
+  class FactoryProducer {
+    + {static} getFactory(choice : String) : AbstractFactory
+  }
+
+  class AbstractFactoryPatternDemo {
+    + {static} main(args : String[])
+  }
+
+}
+
+' Relationships
+Shape <|.. Circle
+Shape <|.. Square
+Shape <|.. Rectangle
+
+Color <|.. Red
+Color <|.. Green
+Color <|.. Blue
+
+AbstractFactory <|-- ShapeFactory
+AbstractFactory <|-- ColorFactory
+
+' Dependencies
+ShapeFactory ..> Circle : creates
+ShapeFactory ..> Square : creates
+ShapeFactory ..> Rectangle : creates
+
+ColorFactory ..> Red : creates
+ColorFactory ..> Green : creates
+ColorFactory ..> Blue : creates
+
+FactoryProducer ..> ShapeFactory : creates
+FactoryProducer ..> ColorFactory : creates
+
+AbstractFactoryPatternDemo ..> FactoryProducer : uses
+AbstractFactoryPatternDemo ..> AbstractFactory : uses
+
+' Notes highlighting the flaw in this specific demo example
+note right of AbstractFactory
+  <b>注意 :</b>
+  这是一个简化的案例。
+  在真实的抽象工厂模式中，工厂通常用于
+  创建<b>产品族 (Product Family)</b>
+  (例如：CreateButton, CreateBorder)，
+  而不是像这样包含互不相关的 getShape 和 getColor
+  (这会导致 ShapeFactory 必须实现 getColor 并返回 null)。
+end note
+
+@enduml
