@@ -1,0 +1,35 @@
+@startuml
+set separator none
+package "cn.snwalker.design.creational.factory.simplefactory" {
+  interface Shape {
+    + draw()
+  }
+  class Circle {
+    + Circle()
+    + draw()
+  }
+  class Rectangle {
+    + Rectangle()
+    + draw()
+  }
+  class Square {
+    + Square()
+    + draw()
+  }
+  class ShapeFactory {
+    + ShapeFactory()
+    + createShape(shapeType : String) : Shape
+  }
+  class FactoryPatternDemo {
+    + FactoryPatternDemo()
+    + main(args : String[]) {static}
+  }
+}
+Shape <|.. Circle
+Shape <|.. Square
+Shape <|.. Rectangle
+ShapeFactory ..> Circle 
+ShapeFactory ..> Square 
+ShapeFactory ..> Rectangle 
+FactoryPatternDemo ..> ShapeFactory 
+@enduml

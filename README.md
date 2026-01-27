@@ -14,9 +14,10 @@
 
 本项目旨在解决“懂理论但不会用”的痛点。区别于传统的 `Foo/Bar` 抽象代码，本项目具有以下特点：
 
-1.  **场景化实战**：每个模式都基于真实的业务场景（如：支付策略、日志装饰、数据库连接池）。
+1.  **场景化实战**：每个模式都基于真实的业务场景（如：支付策略、日志装饰、数据库连接池），并借助plantuml4idea插件绘制UML类图。
 2.  **Spring 源码映射**：重点分析该模式在 Spring 源码中的具体落地，并与我的手写容器 [micro-Spring](https://github.com/SnWalker/micro-Spring) 进行联动。
 3.  **工程化规范**：遵循标准 Java 工程结构，注重代码规范与注释。
+
 
 ## 📂 目录结构 | Project Structure
 
@@ -58,6 +59,9 @@ src/main/java/cn/snwalker/design
 ## 🔗 关联项目
 
 *   [**micro-Spring**](https://github.com/SnWalker/micro-Spring): 本项目的“实战演练场”，我在这里从零手写了一个 Spring 容器，真正将上述设计模式落地。
+
+## 参考
+[java-design-patterns](https://github.com/iluwatar/java-design-patterns/tree/master)
 
 ---
 *Created by [SnWalker](https://github.com/SnWalker)*
