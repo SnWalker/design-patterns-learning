@@ -1,0 +1,59 @@
+@startuml
+set separator none
+title Factory Method Pattern - Computer Example
+
+package "cn.snwalker.design.creational.factory.factorymethod" {
+  
+  ' 1. Abstract Product
+  abstract class Computer {
+    + {abstract} getRAM() : String
+    + {abstract} getHDD() : String
+    + {abstract} getCPU() : String
+  }
+
+  ' 2. Concrete Products
+  class PC {
+    + PC(ram : String, hdd : String, cpu : String)
+  }
+
+  class Server {
+    + Server(ram : String, hdd : String, cpu : String)
+  }
+
+  ' 3. Abstract Factory (Creator)
+  interface ComputerFactory {
+    + createComputer() : Computer
+  }
+
+  ' 4. Concrete Factories (Concrete Creators)
+  class PCFactory {
+    + PCFactory(ram : String, hdd : String, cpu : String)
+    + createComputer() : Computer
+  }
+
+  class ServerFactory {
+    + ServerFactory(ram : String, hdd : String, cpu : String)
+    + createComputer() : Computer
+  }
+
+  ' 5. Client
+  class FactoryMethodDemo {
+    + main(args : String[]) {static}
+  }
+
+}
+
+' Relationships
+Computer <|-- PC
+Computer <|-- Server
+
+ComputerFactory <|.. PCFactory
+ComputerFactory <|.. ServerFactory
+
+PCFactory ..> PC : creates
+ServerFactory ..> Server : creates
+
+FactoryMethodDemo ..> ComputerFactory : uses
+FactoryMethodDemo ..> Computer : uses
+
+@enduml
