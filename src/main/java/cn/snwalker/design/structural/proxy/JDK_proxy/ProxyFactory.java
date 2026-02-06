@@ -4,6 +4,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+/**
+ * 代理工厂（并不是代理对象的类，只提供获取代理对象的方法）
+ */
 public class ProxyFactory {
     private TrainStation trainStation = new TrainStation();
 

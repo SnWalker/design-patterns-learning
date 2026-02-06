@@ -914,6 +914,327 @@ Java提供了一个动态代理类java.lang.reflect.**Proxy**，该类并不是�
 
 代码：
 
+```java
+/**
+ * 卖票接口（抽象主题类）
+ */
+public interface SellTickets {
+    public void sell();
+}
+
+/**
+ * 火车站（真实主题类） 具有卖票功能，实现SellTickets接口。
+ */
+public class TrainStation implements SellTickets {
+    public void sell() {
+        System.out.println("火车站卖票");
+    }
+}
+
+/**
+ * 代理工厂（并不是代理对象的类，只提供获取代理对象的方法）
+ */
+public class ProxyFactory {
+    private TrainStation trainStation = new TrainStation();
+
+    // 获取代理对象
+    public SellTickets getProxyObject() {
+        // 使用动态代理类Proxy提供的方法获取代理对象
+        /*
+            newProxyInstance()方法参数说明：
+            ClassLoader loader ： 类加载器，用于加载代理类，使用真实对象的类加载器即可
+            Class<?>[] interfaces ： 真实对象所实现的接口，代理模式真实对象和代理对象实现相同的接口
+            InvocationHandler h ： 代理对象的调用处理程序
+         */
+        SellTickets proxyObject = (SellTickets) Proxy.newProxyInstance(
+                trainStation.getClass().getClassLoader(),
+                trainStation.getClass().getInterfaces(),
+                new InvocationHandler() {
+                    /*
+                        InvocationHandler中invoke方法参数说明：
+                        proxy ： 代理对象
+                        method ： 对应于在代理对象上调用的接口方法的 Method 实例
+                        args ： 代理对象调用接口方法时传递的实际参数
+                     */
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        System.out.println("代理点收取一定的服务费（JDK动态代理方式）");
+                        // 执行真实对象
+                        Object result = method.invoke(trainStation, args);
+                        return result;
+                    }
+                }
+        );
+        return proxyObject;
+    }
+}
+
+/**
+ * 客户端（访问类）
+ */
+public class Client {
+    public static void main(String[] args) {
+        // 获取代理对象
+        ProxyFactory proxyFactory = new ProxyFactory();
+
+        SellTickets proxyObject = proxyFactory.getProxyObject();
+        proxyObject.sell();
+    }
+}
+```
+
+* **ProxyFactory是代理类吗**？
+
+ProxyFactory不是代理模式中所说的代理类，而代理类是程序在运行过程中动态的在内存中生成的类。通过阿里巴巴开源的 Java 诊断工具（Arthas【阿尔萨斯】）查看代理类的结构：
+
+```java
+package com.sun.proxy;
+
+package cn.snwalker.design.structural.proxy.JDK_proxy.SellTickets;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.UndeclaredThrowableException;
+
+public final class $Proxy0 extends Proxy implements SellTickets {
+    private static Method m1;
+    private static Method m2;
+    private static Method m3;
+    private static Method m0;
+
+    public $Proxy0(InvocationHandler invocationHandler) {
+        super(invocationHandler);
+    }
+
+    static {
+        try {
+            m1 = Class.forName("java.lang.Object").getMethod("equals", Class.forName("java.lang.Object"));
+            m2 = Class.forName("java.lang.Object").getMethod("toString", new Class[0]);
+            m3 = Class.forName("com.itheima.proxy.dynamic.jdk.SellTickets").getMethod("sell", new Class[0]);
+            m0 = Class.forName("java.lang.Object").getMethod("hashCode", new Class[0]);
+            return;
+        }
+        catch (NoSuchMethodException noSuchMethodException) {
+            throw new NoSuchMethodError(noSuchMethodException.getMessage());
+        }
+        catch (ClassNotFoundException classNotFoundException) {
+            throw new NoClassDefFoundError(classNotFoundException.getMessage());
+        }
+    }
+
+    public final boolean equals(Object object) {
+        try {
+            return (Boolean)this.h.invoke(this, m1, new Object[]{object});
+        }
+        catch (Error | RuntimeException throwable) {
+            throw throwable;
+        }
+        catch (Throwable throwable) {
+            throw new UndeclaredThrowableException(throwable);
+        }
+    }
+
+    public final String toString() {
+        try {
+            return (String)this.h.invoke(this, m2, null);
+        }
+        catch (Error | RuntimeException throwable) {
+            throw throwable;
+        }
+        catch (Throwable throwable) {
+            throw new UndeclaredThrowableException(throwable);
+        }
+    }
+
+    public final int hashCode() {
+        try {
+            return (Integer)this.h.invoke(this, m0, null);
+        }
+        catch (Error | RuntimeException throwable) {
+            throw throwable;
+        }
+        catch (Throwable throwable) {
+            throw new UndeclaredThrowableException(throwable);
+        }
+    }
+
+    public final void sell() {
+        try {
+            this.h.invoke(this, m3, null);
+            return;
+        }
+        catch (Error | RuntimeException throwable) {
+            throw throwable;
+        }
+        catch (Throwable throwable) {
+            throw new UndeclaredThrowableException(throwable);
+        }
+    }
+}
+```
+
+从上面的类中，可以看到以下信息：
+
+（1）代理类（$Proxy0）实现了SellTickets。印证了**真实类和代理类实现同样的接口**。
+
+（2）代理类（$Proxy0）将我们提供的**匿名内部类对象传递给了父类**。
+
+* **动态代理的执行流程**？
+
+下面是摘取的重点代码：
+
+```java
+//程序运行过程中动态生成的代理类
+public final class $Proxy0 extends Proxy implements SellTickets {
+    private static Method m3;
+
+    public $Proxy0(InvocationHandler invocationHandler) {
+        super(invocationHandler);
+    }
+
+    static {
+        m3 = Class.forName("com.itheima.proxy.dynamic.jdk.SellTickets").getMethod("sell", new Class[0]);
+    }
+
+    public final void sell() {
+        this.h.invoke(this, m3, null);
+    }
+}
+
+//Java提供的动态代理相关类
+public class Proxy implements java.io.Serializable {
+	protected InvocationHandler h;
+	 
+	protected Proxy(InvocationHandler h) {
+        this.h = h;
+    }
+}
+
+//代理工厂类
+public class ProxyFactory {
+
+    private TrainStation station = new TrainStation();
+
+    public SellTickets getProxyObject() {
+        SellTickets sellTickets = (SellTickets) Proxy.newProxyInstance(station.getClass().getClassLoader(),
+                station.getClass().getInterfaces(),
+                new InvocationHandler() {
+                    
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+                        System.out.println("代理点收取一些服务费用(JDK动态代理方式)");
+                        Object result = method.invoke(station, args);
+                        return result;
+                    }
+                });
+        return sellTickets;
+    }
+}
+
+
+//访问类
+public class Client {
+    public static void main(String[] args) {
+        //获取代理对象
+        ProxyFactory factory = new ProxyFactory();
+        SellTickets proxyObject = factory.getProxyObject();
+        proxyObject.sell();
+    }
+}
+```
+
+执行流程如下：
+
+    1. 在访问类中通过代理对象调用sell()方法
+    2. 根据多态的特性，执行的是代理类（$Proxy0）中的sell()方法
+    3. 代理类（$Proxy0）中的sell()方法中又调用了InvocationHandler接口的子实现类对象的invoke方法
+    4. invoke方法通过反射执行了真实对象所属类(TrainStation)中的sell()方法
+
+#### 1.5 CGLIB动态代理
+
+如果没有定义SellTickets接口，只定义了TrainStation(火车站类)。很显然JDK代理是无法使用了，因为**JDK动态代理要求必须定义接口，对接口进行代理**。
+
+CGLIB是一个功能强大，高性能的代码生成包。它为没有实现接口的类提供代理，为JDK的动态代理提供了很好的补充。
+
+CGLIB是第三方提供的包，所以需要引入jar包的坐标：
+
+```xml
+<dependency>
+    <groupId>cglib</groupId>
+    <artifactId>cglib</artifactId>
+    <version>3.3.0</version>
+</dependency>
+问题：Java 17模块系统禁止cglib反射访问核心类。
+方法：在运行配置的VM options中添加--add-opens java.base/java.lang=ALL-UNNAMED
+```
+
+代码：
+
+```java
+//火车站
+public class TrainStation {
+    public void sell() {
+        System.out.println("火车站卖票");
+    }
+}
+
+//代理工厂
+public class ProxyFactory implements MethodInterceptor {
+    private TrainStation target = new TrainStation();
+
+    public TrainStation getProxyObject() {
+        //创建Enhancer对象，类似于JDK动态代理的Proxy类，下一步就是设置几个参数
+        Enhancer enhancer =new Enhancer();
+        //设置父类的字节码对象
+        enhancer.setSuperclass(target.getClass());
+        //设置回调函数
+        enhancer.setCallback(this);
+        //创建代理对象
+        TrainStation obj = (TrainStation) enhancer.create();
+        return obj;
+    }
+
+    /*
+        intercept方法参数说明：
+            o ： 代理对象
+            method ： 真实对象中的方法的Method实例
+            args ： 实际参数
+            methodProxy ：代理对象中的方法的method实例
+     */
+    public TrainStation intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        System.out.println("代理点收取一些服务费用(CGLIB动态代理方式)");
+        TrainStation result = (TrainStation) methodProxy.invokeSuper(o, args);
+        return result;
+    }
+}
+
+//测试类
+public class Client {
+    public static void main(String[] args) {
+        //创建代理工厂对象
+        ProxyFactory factory = new ProxyFactory();
+        //获取代理对象
+        TrainStation proxyObject = factory.getProxyObject();
+
+        proxyObject.sell();
+    }
+}
+```
+
+#### 1.6 三种代理的对比
+
+* jdk代理和CGLIB代理
+
+  使用CGLib实现动态代理，CGLib底层采用ASM字节码生成框架，使用字节码技术生成代理类，在JDK1.6之前比使用Java反射效率要高。唯一需要注意的是，CGLib不能对声明为final的类或者方法进行代理，因为CGLib原理是动态生成被代理类的子类。
+
+  在JDK1.6、JDK1.7、JDK1.8逐步对JDK动态代理优化之后，在调用次数较少的情况下，JDK代理效率高于CGLib代理效率，只有当进行大量调用的时候，JDK1.6和JDK1.7比CGLib代理效率低一点，但是到JDK1.8的时候，JDK代理效率高于CGLib代理。所以如果有接口使用JDK动态代理，如果没有接口使用CGLIB代理。
+
+* 动态代理和静态代理
+
+  动态代理与静态代理相比较，最大的好处是接口中声明的所有方法都被转移到调用处理器一个集中的方法中处理（InvocationHandler.invoke）。这样，在接口方法数量比较多的时候，我们可以进行灵活处理，而不需要像静态代理那样每一个方法进行中转。
+
+  如果接口增加一个方法，静态代理模式除了所有实现类需要实现这个方法外，所有代理类也需要实现此方法。增加了代码维护的复杂度。而动态代理不会出现该问题。
+
 
 
 ### 2、适配器模式
