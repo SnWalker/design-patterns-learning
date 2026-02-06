@@ -910,6 +910,10 @@ public class Client {
 
 #### 1.4 JDK动态代理
 
+Java提供了一个动态代理类java.lang.reflect.**Proxy**，该类并不是代理对象的类，而是提供了一个创建代理对象的静态方法**newProxyInstance()**来获取代理对象。
+
+代码：
+
 
 
 ### 2、适配器模式
