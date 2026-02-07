@@ -5,7 +5,7 @@ package cn.snwalker.design.structural.proxy.static_proxy;
  */
 public class Client {
     public static void main(String[] args) {
-        ProxyPoint proxyPoint = new ProxyPoint();
+        SellTickets proxyPoint = new ProxyPoint();
         proxyPoint.sell();
     }
 }

@@ -1,0 +1,30 @@
+@startuml
+set separator none
+
+package "cn.snwalker.design.structural.proxy.CGLib_proxy" {
+  class TrainStation {
+    + sell()
+  }
+
+  class ProxyFactory {
+    - trainStation: TrainStation
+    + getProxyObject(): TrainStation
+    + intercept(o: Object, method: Method, args: Object[], methodProxy: MethodProxy): TrainStation
+  }
+
+  class Client {
+    + {static} main(args: String[])
+  }
+}
+
+ProxyFactory ..|> "MethodInterceptor"
+ProxyFactory o-- TrainStation
+Client ..> ProxyFactory
+Client ..> TrainStation
+
+note bottom of ProxyFactory
+  Uses CGLib Enhancer to create 
+   a subclass of TrainStation
+end note
+
+@enduml

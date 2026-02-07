@@ -1,0 +1,28 @@
+@startuml
+set separator none
+
+package "cn.snwalker.design.structural.proxy.static_proxy" {
+  interface SellTickets {
+    + sell()
+  }
+
+  class TrainStation {
+    + sell()
+  }
+
+  class ProxyPoint {
+    - trainStation: TrainStation
+    + sell()
+  }
+
+  class Client {
+    + {static} main(args: String[])
+  }
+}
+
+TrainStation ..|> SellTickets
+ProxyPoint ..|> SellTickets
+ProxyPoint o-- TrainStation
+Client ..> ProxyPoint
+
+@enduml

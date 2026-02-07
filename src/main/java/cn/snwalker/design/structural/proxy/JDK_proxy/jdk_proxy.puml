@@ -1,0 +1,33 @@
+@startuml
+set separator none
+
+package "cn.snwalker.design.structural.proxy.JDK_proxy" {
+  interface SellTickets {
+    + sell()
+  }
+
+  class TrainStation {
+    + sell()
+  }
+
+  class ProxyFactory {
+    - trainStation: TrainStation
+    + getProxyObject(): SellTickets
+  }
+
+  class Client {
+    + {static} main(args: String[])
+  }
+}
+
+TrainStation ..|> SellTickets
+ProxyFactory o-- TrainStation
+Client ..> ProxyFactory
+Client ..> SellTickets
+
+note right of ProxyFactory
+  Uses java.lang.reflect.Proxy 
+  to create dynamic proxy object
+end note
+
+@enduml
